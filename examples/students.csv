@@ -1,0 +1,7 @@
+studentId,firstName,lastName,fullName,email,class,password
+STU001,Jean,Dupont,Jean Dupont,jean.dupont@mccibs.com,Classe A,password123
+STU002,Marie,Martin,Marie Martin,marie.martin@mccibs.com,Classe A,password123
+STU003,Pierre,Durand,Pierre Durand,pierre.durand@mccibs.com,Classe B,password123
+STU004,Sophie,Leroy,Sophie Leroy,sophie.leroy@mccibs.com,Classe B,password123
+STU005,Lucas,Moreau,Lucas Moreau,lucas.moreau@mccibs.com,Classe C,password123
+STU006,Emma,Petit,Emma Petit,emma.petit@mccibs.com,Classe C,password123 

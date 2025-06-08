@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCCIBS Administration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1a237e;
+            --secondary-color: #0d47a1;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        #sidebar {
+            min-width: 250px;
+            max-width: 250px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: #fff;
+            transition: all 0.3s;
+        }
+
+        #sidebar.active {
+            margin-left: -250px;
+        }
+
+        #sidebar .sidebar-header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        #sidebar ul.components {
+            padding: 20px 0;
+        }
+
+        #sidebar ul li a {
+            padding: 10px 20px;
+            font-size: 1.1em;
+            display: block;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        #sidebar ul li a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        #sidebar ul li.active > a {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        #content {
+            width: 100%;
+            padding: 20px;
+            min-height: 100vh;
+            transition: all 0.3s;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: #fff;
+            border-radius: 10px 10px 0 0 !important;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card i {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        .stat-card p {
+            margin: 0;
+            opacity: 0.8;
+        }
+
+        .table {
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .table thead th {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: #fff;
+            border: none;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <h3>MCCIBS Admin</h3>
+            </div>
+
+            <ul class="list-unstyled components">
+                <li class="active">
+                    <a href="#" data-page="dashboard">
+                        <i class="fas fa-tachometer-alt me-2"></i>
+                        Tableau de bord
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-page="students">
+                        <i class="fas fa-user-graduate me-2"></i>
+                        Étudiants
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-page="notifications">
+                        <i class="fas fa-bell me-2"></i>
+                        Notifications
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-page="settings">
+                        <i class="fas fa-cog me-2"></i>
+                        Paramètres
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Page Content -->
+        <div id="content">
+            <div class="admin-header">
+                <button type="button" id="sidebarCollapse" class="btn btn-primary">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="admin-info">
+                    <div class="admin-avatar">
+                        <span id="adminInitials"></span>
+                    </div>
+                    <div>
+                        <span id="adminName"></span>
+                        <button id="logoutBtn" class="btn btn-link text-danger">
+                            <i class="fas fa-sign-out-alt"></i> Déconnexion
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page active">
+                <h2 class="mb-4">Tableau de bord</h2>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <i class="fas fa-user-graduate"></i>
+                            <h3 id="totalStudents">0</h3>
+                            <p>Étudiants</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <i class="fas fa-bell"></i>
+                            <h3 id="activeNotifications">0</h3>
+                            <p>Notifications actives</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <i class="fas fa-mobile-alt"></i>
+                            <h3 id="connectedDevices">0</h3>
+                            <p>Appareils connectés</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Students Page -->
+            <div id="students" class="page">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Gestion des étudiants</h2>
+                    <div>
+                        <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#importStudentsModal">
+                            <i class="fas fa-file-import"></i> Importer des étudiants
+                        </button>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+                            <i class="fas fa-plus"></i> Ajouter un étudiant
+                        </button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="classFilter" class="form-label">Filtrer par classe</label>
+                            <select class="form-select" id="classFilter">
+                                <option value="">Toutes les classes</option>
+                                <option value="BTS SIO 1">BTS SIO 1</option>
+                                <option value="BTS SIO 2">BTS SIO 2</option>
+                                <option value="BTS GPME 1">BTS GPME 1</option>
+                                <option value="BTS GPME 2">BTS GPME 2</option>
+                                <option value="BTS COM 1">BTS COM 1</option>
+                                <option value="BTS COM 2">BTS COM 2</option>
+                                <option value="BTS MCO 1">BTS MCO 1</option>
+                                <option value="BTS MCO 2">BTS MCO 2</option>
+                                <option value="Licence Gestion">Licence Gestion</option>
+                                <option value="Licence Com">Licence Com</option>
+                                <option value="Licence Tourisme">Licence Tourisme</option>
+                                <option value="Licence Informatique">Licence Informatique</option>
+                                <option value="Master MCI 1">Master MCI 1</option>
+                                <option value="Master MCI 2">Master MCI 2</option>
+                                <option value="Master Tourisme 1">Master Tourisme 1</option>
+                                <option value="Master Tourisme 2">Master Tourisme 2</option>
+                            </select>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Photo</th>
+                                        <th>ID</th>
+                                        <th>Prénom</th>
+                                        <th>Nom</th>
+                                        <th>Email</th>
+                                        <th>Classe</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentsTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications Page -->
+            <div id="notifications" class="page">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Gestion des notifications</h2>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addNotificationModal">
+                        <i class="fas fa-plus"></i> Ajouter une notification
+                    </button>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Titre</th>
+                                        <th>Message</th>
+                                        <th>Type</th>
+                                        <th>Date</th>
+                                        <th>Statut</th>
+                                        <th>Image</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="notificationsTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="settings" class="page">
+                <h2 class="mb-4">Paramètres</h2>
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Configuration Firebase</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="firebaseConfigForm">
+                            <div class="mb-3">
+                                <label for="apiKey" class="form-label">API Key</label>
+                                <input type="text" class="form-control" id="apiKey" name="apiKey" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="projectId" class="form-label">Project ID</label>
+                                <input type="text" class="form-control" id="projectId" name="projectId" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Enregistrer</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div class="modal fade" id="addStudentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ajouter un étudiant</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="studentForm">
+                        <input type="hidden" id="studentId">
+                        <div class="mb-3">
+                            <label for="studentPhoto" class="form-label">Photo de l'étudiant</label>
+                            <div class="d-flex align-items-center gap-3">
+                                <img id="studentPhotoPreview" src="" alt="Photo de l'étudiant" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover; display: none;">
+                                <div class="flex-grow-1">
+                                    <input type="file" class="form-control" id="studentPhoto" accept="image/*">
+                                    <small class="text-muted">Format accepté : JPG, PNG. Taille max : 5MB</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="studentIdInput" class="form-label">ID Étudiant</label>
+                            <input type="text" class="form-control" id="studentIdInput" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="firstName" class="form-label">Prénom</label>
+                            <input type="text" class="form-control" id="firstName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lastName" class="form-label">Nom</label>
+                            <input type="text" class="form-control" id="lastName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="class" class="form-label">Classe</label>
+                            <select class="form-select" id="class" required>
+                                <option value="">Sélectionnez une classe</option>
+                                <option value="BTS SIO 1">BTS SIO 1</option>
+                                <option value="BTS SIO 2">BTS SIO 2</option>
+                                <option value="BTS GPME 1">BTS GPME 1</option>
+                                <option value="BTS GPME 2">BTS GPME 2</option>
+                                <option value="BTS COM 1">BTS COM 1</option>
+                                <option value="BTS COM 2">BTS COM 2</option>
+                                <option value="BTS MCO 1">BTS MCO 1</option>
+                                <option value="BTS MCO 2">BTS MCO 2</option>
+                                <option value="Licence Gestion">Licence Gestion</option>
+                                <option value="Licence Com">Licence Com</option>
+                                <option value="Licence Tourisme">Licence Tourisme</option>
+                                <option value="Licence Informatique">Licence Informatique</option>
+                                <option value="Master MCI 1">Master MCI 1</option>
+                                <option value="Master MCI 2">Master MCI 2</option>
+                                <option value="Master Tourisme 1">Master Tourisme 1</option>
+                                <option value="Master Tourisme 2">Master Tourisme 2</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Mot de passe</label>
+                            <input type="password" class="form-control" id="password">
+                            <small class="text-muted">Laissez vide pour ne pas modifier le mot de passe</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="saveStudentBtn">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Notification Modal -->
+    <div class="modal fade" id="addNotificationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ajouter une notification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addNotificationForm">
+                        <div class="mb-3">
+                            <label for="notificationTitle" class="form-label">Titre</label>
+                            <input type="text" class="form-control" id="notificationTitle" name="notificationTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notificationMessage" class="form-label">Message</label>
+                            <textarea class="form-control" id="notificationMessage" name="notificationMessage" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notificationType" class="form-label">Type</label>
+                            <select class="form-select" id="notificationType" name="notificationType" required>
+                                <option value="emergency">Urgence</option>
+                                <option value="course_change">Changement de cours</option>
+                                <option value="announcement">Annonce</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notificationImage" class="form-label">Image (optionnel)</label>
+                            <div class="d-flex align-items-center gap-3">
+                                <img id="notificationImagePreview" src="" alt="Aperçu de l'image" class="img-thumbnail" style="max-width: 200px; max-height: 200px; display: none;">
+                                <div class="flex-grow-1">
+                                    <input type="file" class="form-control" id="notificationImage" name="notificationImage" accept="image/*">
+                                    <div class="form-text">Téléchargez une image ou entrez une URL</div>
+                                    <input type="url" class="form-control mt-2" id="notificationImageUrl" name="notificationImageUrl" placeholder="URL de l'image">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="saveNotificationBtn">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Students Modal -->
+    <div class="modal fade" id="importStudentsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Importer des étudiants</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="importStudentsForm">
+                        <div class="mb-3">
+                            <label for="csvFile" class="form-label">Fichier CSV</label>
+                            <input type="file" class="form-control" id="csvFile" name="file" accept=".csv" required>
+                        </div>
+                        <div class="alert alert-info">
+                            <h6>Format du fichier CSV :</h6>
+                            <p class="mb-0">Le fichier doit contenir les colonnes suivantes (dans cet ordre) :</p>
+                            <ul class="mb-0">
+                                <li>studentId : ID Étudiant</li>
+                                <li>firstName : Prénom</li>
+                                <li>lastName : Nom</li>
+                                <li>email : Email de l'étudiant</li>
+                                <li>class : Classe de l'étudiant (utiliser exactement une des valeurs du menu déroulant)</li>
+                                <li>password : Mot de passe (optionnel, par défaut : password123)</li>
+                            </ul>
+                            <p class="mt-2 mb-0"><strong>Note :</strong> L'import de photo n'est pas possible via CSV. Ajoutez la photo manuellement après création de l'étudiant.</p>
+                        </div>
+                    </form>
+                    <div id="importResults" class="mt-3" style="display: none;">
+                        <h6>Résultats de l'import :</h6>
+                        <div class="alert alert-success">
+                            <span id="successCount">0</span> étudiants importés avec succès
+                        </div>
+                        <div class="alert alert-danger">
+                            <span id="failedCount">0</span> échecs
+                        </div>
+                        <div id="errorList" class="mt-2"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="importStudentsBtn">Importer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html> 

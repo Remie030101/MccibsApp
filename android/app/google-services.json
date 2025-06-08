@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "939900712321",
+    "project_id": "mccibs-mobile-app-926bd",
+    "storage_bucket": "mccibs-mobile-app-926bd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:939900712321:android:6ca8b5d964104c907fa480",
+        "android_client_info": {
+          "package_name": "com.example.mccibs_mobile_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABMCkFYGoRaCphwVybmWSf5EJTdaHHxp4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:939900712321:android:0fd0ee59f446cd457fa480",
+        "android_client_info": {
+          "package_name": "com.example.mccibs_mobile_app_v2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABMCkFYGoRaCphwVybmWSf5EJTdaHHxp4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
