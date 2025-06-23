@@ -21,6 +21,8 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/students', require('./routes/students'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/settings', require('./routes/settings'));
+app.use('/api/practical-info', require('./routes/practicalInfo'));
+app.use('/api/events', require('./routes/events'));
 
 // Serve static files
 app.get('/', (req, res) => {

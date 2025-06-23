@@ -3,12 +3,16 @@ import 'package:firebase_core/firebase_core.dart';
 import 'screens/login_screen.dart';
 import 'screens/student_card_screen.dart';
 import 'screens/notifications_screen.dart';
+import 'screens/practical_info_screen.dart';
+import 'screens/events_screen.dart';
 import 'screens/splash_screen.dart';
 import 'services/api_service.dart';
 import 'services/notification_service.dart';
 import 'models/student.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:shared_preferences/shared_preferences.dart';
+
+const kAppHeaderBlue = Color(0xFF1E88E5); // Notifications header blue
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,6 +50,8 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const HomeScreen(),
         '/notifications': (context) => const NotificationsScreen(),
+        '/practical-info': (context) => const PracticalInfoScreen(),
+        '/events': (context) => const EventsScreen(),
       },
     );
   }
@@ -163,12 +169,22 @@ class _HomeScreenState extends State<HomeScreen> {
     final List<Widget> _pages = [
       StudentCardScreen(student: _student!),
       NotificationsScreen(),
+      const PracticalInfoScreen(),
+      const EventsScreen(),
     ];
 
     return Scaffold(
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: kAppHeaderBlue,
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white70,
+        selectedFontSize: 14,
+        unselectedFontSize: 12,
+        iconSize: 30,
+        showUnselectedLabels: true,
         items: [
           const BottomNavigationBarItem(
             icon: Icon(Icons.card_membership),
@@ -179,11 +195,19 @@ class _HomeScreenState extends State<HomeScreen> {
               showBadge: _unreadCount > 0,
               badgeContent: Text(
                 _unreadCount.toString(),
-                style: const TextStyle(color: Colors.white, fontSize: 10),
+                style: TextStyle(color: Colors.white, fontSize: 10),
               ),
-              child: const Icon(Icons.notifications),
+              child: Icon(Icons.notifications),
             ),
             label: 'Notifications',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.info),
+            label: 'Info',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: 'Événements',
           ),
         ],
         onTap: _onItemTapped,

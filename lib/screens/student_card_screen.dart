@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/student.dart';
+import '../main.dart';
 
 class StudentCardScreen extends StatelessWidget {
   final Student student;
@@ -10,7 +11,10 @@ class StudentCardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Student Card'),
+        title: const Text('Carte Étudiant'),
+        backgroundColor: kAppHeaderBlue,
+        foregroundColor: Colors.white,
+        elevation: 0,
       ),
       body: Container(
         color: Colors.grey.shade100,

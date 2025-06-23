@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/notification.dart';
 import '../services/api_service.dart';
+import '../main.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -97,6 +98,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
     return Scaffold(
       appBar: AppBar(
         title: const Text('Notifications'),
+        backgroundColor: kAppHeaderBlue,
+        foregroundColor: Colors.white,
         bottom: TabBar(
           controller: _tabController,
           labelColor: Colors.white,

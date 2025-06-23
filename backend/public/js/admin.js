@@ -4,6 +4,12 @@ const API_URL = '/api';
 // Variable globale pour l'ID de l'étudiant en cours d'édition
 let currentStudentId = null;
 
+// Variable globale pour l'ID de l'information pratique en cours d'édition
+let currentPracticalInfoId = null;
+
+// Global variable for the calendar instance
+let calendar;
+
 // Load students
 async function loadStudents() {
     try {
@@ -145,6 +151,252 @@ async function loadDashboardData() {
         console.error('Error loading dashboard data:', error);
         if (error.message === 'Unauthorized') {
             window.location.href = '/login.html';
+        }
+    }
+}
+
+// Load practical info
+async function loadPracticalInfo() {
+    try {
+        const response = await fetch(`${API_URL}/practical-info/admin/all`, {
+            headers: {
+                'x-auth-token': localStorage.getItem('adminToken')
+            }
+        });
+        if (!response.ok) {
+            throw new Error('Failed to load practical info');
+        }
+
+        const practicalInfo = await response.json();
+        const tbody = document.getElementById('practicalInfoTableBody');
+        tbody.innerHTML = '';
+
+        // Get selected category filter
+        const categoryFilter = document.getElementById('practicalInfoFilter').value;
+
+        // Filter practical info if a category is selected
+        const filteredPracticalInfo = categoryFilter 
+            ? practicalInfo.filter(info => info.category === categoryFilter)
+            : practicalInfo;
+
+        filteredPracticalInfo.forEach(info => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${info.title}</td>
+                <td>${info.description}</td>
+                <td>
+                    <span class="badge ${info.type === 'pdf' ? 'bg-danger' : 'bg-success'}">
+                        ${info.type === 'pdf' ? 'PDF' : 'Texte'}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge bg-primary">
+                        ${getCategoryDisplayName(info.category)}
+                    </span>
+                </td>
+                <td>${new Date(info.createdAt).toLocaleDateString()}</td>
+                <td>
+                    <span class="badge ${info.isActive ? 'bg-success' : 'bg-secondary'}">
+                        ${info.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-info me-2" onclick="editPracticalInfo('${info._id}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deletePracticalInfo('${info._id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (error) {
+        console.error('Error loading practical info:', error);
+        if (error.message === 'Unauthorized') {
+            window.location.href = '/login.html';
+        }
+    }
+}
+
+// Get category display name
+function getCategoryDisplayName(category) {
+    switch (category) {
+        case 'academic':
+            return 'Académique';
+        case 'administrative':
+            return 'Administratif';
+        case 'student_life':
+            return 'Vie étudiante';
+        case 'other':
+            return 'Autre';
+        default:
+            return category;
+    }
+}
+
+// ===== EVENT CALENDAR FUNCTIONS =====
+
+// Initialize Calendar
+function initializeCalendar() {
+    const calendarEl = document.getElementById('calendar');
+    calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listWeek'
+        },
+        locale: 'fr',
+        buttonText: {
+            today: 'Aujourd\'hui',
+            month: 'Mois',
+            week: 'Semaine',
+            list: 'Liste'
+        },
+        events: async function(fetchInfo, successCallback, failureCallback) {
+            try {
+                const response = await fetch(`${API_URL}/events/all`, {
+                    headers: { 'x-auth-token': localStorage.getItem('adminToken') }
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to load events');
+                }
+                const events = await response.json();
+                const formattedEvents = events.map(event => ({
+                    id: event._id,
+                    title: event.title,
+                    start: event.startDate,
+                    end: event.endDate,
+                    extendedProps: {
+                        description: event.description,
+                        location: event.location,
+                        category: event.category
+                    }
+                }));
+                successCallback(formattedEvents);
+            } catch (error) {
+                console.error('Error loading events:', error);
+                failureCallback(error);
+            }
+        },
+        eventClick: function(info) {
+            openEventModal(info.event);
+        },
+        dateClick: function(info) {
+            openEventModal(null, info.dateStr);
+        }
+    });
+    calendar.render();
+}
+
+// Open Event Modal
+function openEventModal(event = null, dateStr = null) {
+    const modal = new bootstrap.Modal(document.getElementById('addEventModal'));
+    const form = document.getElementById('eventForm');
+    form.reset();
+
+    const modalTitle = document.getElementById('eventModalTitle');
+    const eventIdInput = document.getElementById('eventId');
+    const deleteBtn = document.getElementById('deleteEventBtn');
+
+    if (event) {
+        // Editing existing event
+        modalTitle.textContent = 'Modifier un événement';
+        eventIdInput.value = event.id;
+        document.getElementById('eventTitle').value = event.title;
+        document.getElementById('eventDescription').value = event.extendedProps.description;
+        document.getElementById('eventLocation').value = event.extendedProps.location;
+        document.getElementById('eventCategory').value = event.extendedProps.category;
+        
+        // Format dates for datetime-local input
+        const startDate = new Date(event.start);
+        const endDate = new Date(event.end);
+        startDate.setMinutes(startDate.getMinutes() - startDate.getTimezoneOffset());
+        endDate.setMinutes(endDate.getMinutes() - endDate.getTimezoneOffset());
+        
+        document.getElementById('eventStartDate').value = startDate.toISOString().slice(0, 16);
+        document.getElementById('eventEndDate').value = endDate.toISOString().slice(0, 16);
+
+        deleteBtn.style.display = 'block';
+        deleteBtn.onclick = () => deleteEvent(event.id);
+
+    } else {
+        // Adding new event
+        modalTitle.textContent = 'Ajouter un événement';
+        eventIdInput.value = '';
+        if (dateStr) {
+            const startDate = new Date(dateStr);
+            startDate.setMinutes(startDate.getMinutes() - startDate.getTimezoneOffset());
+            document.getElementById('eventStartDate').value = startDate.toISOString().slice(0, 16);
+        }
+        deleteBtn.style.display = 'none';
+    }
+
+    modal.show();
+}
+
+// Save Event
+async function saveEvent() {
+    const eventId = document.getElementById('eventId').value;
+    const eventData = {
+        title: document.getElementById('eventTitle').value,
+        description: document.getElementById('eventDescription').value,
+        startDate: document.getElementById('eventStartDate').value,
+        endDate: document.getElementById('eventEndDate').value,
+        location: document.getElementById('eventLocation').value,
+        category: document.getElementById('eventCategory').value,
+    };
+
+    const method = eventId ? 'PUT' : 'POST';
+    const url = eventId ? `${API_URL}/events/${eventId}` : `${API_URL}/events`;
+
+    try {
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': localStorage.getItem('adminToken')
+            },
+            body: JSON.stringify(eventData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to save event');
+        }
+
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addEventModal'));
+        modal.hide();
+        calendar.refetchEvents();
+
+    } catch (error) {
+        console.error('Error saving event:', error);
+        alert(error.message);
+    }
+}
+
+// Delete Event
+async function deleteEvent(id) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) {
+        try {
+            const response = await fetch(`${API_URL}/events/${id}`, {
+                method: 'DELETE',
+                headers: { 'x-auth-token': localStorage.getItem('adminToken') }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to delete event');
+            }
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addEventModal'));
+            modal.hide();
+            calendar.refetchEvents();
+
+        } catch (error) {
+            console.error('Error deleting event:', error);
+            alert(error.message);
         }
     }
 }
@@ -593,10 +845,63 @@ document.addEventListener('DOMContentLoaded', function() {
         classFilter.addEventListener('change', loadStudents);
     }
 
+    // Add new practical info button handler
+    const savePracticalInfoBtn = document.getElementById('savePracticalInfoBtn');
+    if (savePracticalInfoBtn) {
+        savePracticalInfoBtn.addEventListener('click', addPracticalInfo);
+    }
+
+    // Reset practical info modal when closed
+    const addPracticalInfoModal = document.getElementById('addPracticalInfoModal');
+    if (addPracticalInfoModal) {
+        addPracticalInfoModal.addEventListener('hidden.bs.modal', function() {
+            const form = document.getElementById('practicalInfoForm');
+            form.reset();
+            document.getElementById('textContentSection').style.display = 'none';
+            document.getElementById('pdfContentSection').style.display = 'none';
+            currentPracticalInfoId = null;
+            document.querySelector('#addPracticalInfoModal .modal-title').textContent = 'Ajouter une information pratique';
+        });
+    }
+
+    // Practical info type change handler
+    const practicalInfoType = document.getElementById('practicalInfoType');
+    if (practicalInfoType) {
+        practicalInfoType.addEventListener('change', function() {
+            const textSection = document.getElementById('textContentSection');
+            const pdfSection = document.getElementById('pdfContentSection');
+            
+            if (this.value === 'text') {
+                textSection.style.display = 'block';
+                pdfSection.style.display = 'none';
+            } else if (this.value === 'pdf') {
+                textSection.style.display = 'none';
+                pdfSection.style.display = 'block';
+            } else {
+                textSection.style.display = 'none';
+                pdfSection.style.display = 'none';
+            }
+        });
+    }
+
+    // Practical info filter change handler
+    const practicalInfoFilter = document.getElementById('practicalInfoFilter');
+    if (practicalInfoFilter) {
+        practicalInfoFilter.addEventListener('change', function() {
+            loadPracticalInfo();
+        });
+    }
+
+    // Event handlers for event modal
+    document.getElementById('addEventBtn').addEventListener('click', () => openEventModal());
+    document.getElementById('saveEventBtn').addEventListener('click', saveEvent);
+
     // Initial load
     loadDashboardData();
     loadStudents();
     loadNotifications();
+    loadPracticalInfo();
+    initializeCalendar(); // Initialize the calendar
 });
 
 // Global functions for table actions
@@ -720,7 +1025,7 @@ async function deleteNotification(id) {
             alert('Failed to delete notification. Please try again.');
         }
     }
-} 
+}
 
 // Fonction pour afficher la photo de l'étudiant
 function displayStudentPhoto(photoPath) {
@@ -852,5 +1157,124 @@ async function editNotification(id) {
     } catch (error) {
         console.error('Error fetching notification details:', error);
         alert('Failed to fetch notification details. Please try again.');
+    }
+}
+
+// Add new practical info
+async function addPracticalInfo() {
+    try {
+        const form = document.getElementById('practicalInfoForm');
+        const formData = new FormData(form);
+        
+        // Correctly set the 'isActive' field to a "true" or "false" string
+        formData.set('isActive', document.getElementById('practicalInfoActive').checked);
+
+        const method = currentPracticalInfoId ? 'PUT' : 'POST';
+        const url = currentPracticalInfoId 
+            ? `${API_URL}/practical-info/${currentPracticalInfoId}`
+            : `${API_URL}/practical-info`;
+
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'x-auth-token': localStorage.getItem('adminToken')
+            },
+            body: formData
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.message || 'Failed to save practical info');
+        }
+
+        // Reset form and close modal
+        form.reset();
+        document.getElementById('textContentSection').style.display = 'none';
+        document.getElementById('pdfContentSection').style.display = 'none';
+        currentPracticalInfoId = null;
+        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addPracticalInfoModal'));
+        modal.hide();
+
+        // Reload the practical info list
+        await loadPracticalInfo();
+    } catch (error) {
+        console.error('Error saving practical info:', error);
+        alert(error.message || 'Erreur lors de la sauvegarde. Veuillez réessayer.');
+    }
+}
+
+// Edit practical info
+async function editPracticalInfo(id) {
+    try {
+        const response = await fetch(`${API_URL}/practical-info/${id}`, {
+            headers: {
+                'x-auth-token': localStorage.getItem('adminToken')
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch practical info details');
+        }
+        
+        const practicalInfo = await response.json();
+        currentPracticalInfoId = id;
+        
+        // Fill the form
+        document.getElementById('practicalInfoTitle').value = practicalInfo.title;
+        document.getElementById('practicalInfoDescription').value = practicalInfo.description;
+        document.getElementById('practicalInfoCategory').value = practicalInfo.category;
+        document.getElementById('practicalInfoType').value = practicalInfo.type;
+        document.getElementById('practicalInfoActive').checked = practicalInfo.isActive;
+        
+        // Show/hide content sections based on type
+        const textSection = document.getElementById('textContentSection');
+        const pdfSection = document.getElementById('pdfContentSection');
+        
+        if (practicalInfo.type === 'text') {
+            textSection.style.display = 'block';
+            pdfSection.style.display = 'none';
+            document.getElementById('practicalInfoContent').value = practicalInfo.content || '';
+        } else if (practicalInfo.type === 'pdf') {
+            textSection.style.display = 'none';
+            pdfSection.style.display = 'block';
+            // Note: We can't pre-fill the file input for security reasons
+        }
+        
+        // Show the modal
+        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('addPracticalInfoModal'));
+        modal.show();
+        
+        // Update modal title
+        document.querySelector('#addPracticalInfoModal .modal-title').textContent = 'Modifier une information pratique';
+        
+    } catch (error) {
+        console.error('Error fetching practical info details:', error);
+        alert('Erreur lors de la récupération des détails. Veuillez réessayer.');
+    }
+}
+
+// Delete practical info
+async function deletePracticalInfo(id) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette information pratique ?')) {
+        try {
+            const response = await fetch(`${API_URL}/practical-info/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'x-auth-token': localStorage.getItem('adminToken')
+                }
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || 'Failed to delete practical info');
+            }
+
+            // Reload the practical info list
+            await loadPracticalInfo();
+        } catch (error) {
+            console.error('Error deleting practical info:', error);
+            alert(error.message || 'Erreur lors de la suppression. Veuillez réessayer.');
+        }
     }
 } 

@@ -6,6 +6,7 @@
     <title>MCCIBS Administration</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
     <style>
         :root {
             --primary-color: #1a237e;
@@ -184,6 +185,18 @@
                     </a>
                 </li>
                 <li>
+                    <a href="#" data-page="practical-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Info Pratique
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-page="events">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        Événements
+                    </a>
+                </li>
+                <li>
                     <a href="#" data-page="settings">
                         <i class="fas fa-cog me-2"></i>
                         Paramètres
@@ -324,6 +337,62 @@
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Practical Info Page -->
+            <div id="practical-info" class="page">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Gestion des informations pratiques</h2>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPracticalInfoModal">
+                        <i class="fas fa-plus"></i> Ajouter une information
+                    </button>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="practicalInfoFilter" class="form-label">Filtrer par catégorie</label>
+                            <select class="form-select" id="practicalInfoFilter">
+                                <option value="">Toutes les catégories</option>
+                                <option value="academic">Académique</option>
+                                <option value="administrative">Administratif</option>
+                                <option value="student_life">Vie étudiante</option>
+                                <option value="other">Autre</option>
+                            </select>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Titre</th>
+                                        <th>Description</th>
+                                        <th>Type</th>
+                                        <th>Catégorie</th>
+                                        <th>Date de création</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="practicalInfoTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Events Page -->
+            <div id="events" class="page">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Calendrier des événements</h2>
+                    <button class="btn btn-primary" id="addEventBtn">
+                        <i class="fas fa-plus"></i> Ajouter un événement
+                    </button>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div id="calendar"></div>
                     </div>
                 </div>
             </div>
@@ -516,6 +585,149 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                     <button type="button" class="btn btn-primary" id="importStudentsBtn">Importer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Practical Info Modal -->
+    <div class="modal fade" id="addPracticalInfoModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ajouter une information pratique</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="practicalInfoForm">
+                        <input type="hidden" id="practicalInfoId">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="practicalInfoTitle" class="form-label">Titre *</label>
+                                    <input type="text" class="form-control" id="practicalInfoTitle" name="title" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="practicalInfoCategory" class="form-label">Catégorie *</label>
+                                    <select class="form-select" id="practicalInfoCategory" name="category" required>
+                                        <option value="">Sélectionnez une catégorie</option>
+                                        <option value="academic">Académique</option>
+                                        <option value="administrative">Administratif</option>
+                                        <option value="student_life">Vie étudiante</option>
+                                        <option value="other">Autre</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="practicalInfoDescription" class="form-label">Description *</label>
+                            <textarea class="form-control" id="practicalInfoDescription" name="description" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="practicalInfoType" class="form-label">Type de contenu *</label>
+                            <select class="form-select" id="practicalInfoType" name="type" required>
+                                <option value="">Sélectionnez un type</option>
+                                <option value="text">Texte</option>
+                                <option value="pdf">PDF</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Text Content Section -->
+                        <div id="textContentSection" style="display: none;">
+                            <div class="mb-3">
+                                <label for="practicalInfoContent" class="form-label">Contenu *</label>
+                                <textarea class="form-control" id="practicalInfoContent" name="content" rows="10" placeholder="Entrez le contenu de l'information..."></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- PDF Content Section -->
+                        <div id="pdfContentSection" style="display: none;">
+                            <div class="mb-3">
+                                <label for="practicalInfoPdfFile" class="form-label">Fichier PDF *</label>
+                                <input type="file" class="form-control" id="practicalInfoPdfFile" name="pdfFile" accept=".pdf">
+                                <div class="form-text">Format accepté : PDF. Taille max : 10MB</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="practicalInfoActive" name="isActive" checked>
+                                <label class="form-check-label" for="practicalInfoActive">
+                                    Information active (visible pour les étudiants)
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="savePracticalInfoBtn">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Event Modal -->
+    <div class="modal fade" id="addEventModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalTitle">Ajouter un événement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="eventForm">
+                        <input type="hidden" id="eventId">
+                        <div class="mb-3">
+                            <label for="eventTitle" class="form-label">Titre *</label>
+                            <input type="text" class="form-control" id="eventTitle" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="eventStartDate" class="form-label">Date de début *</label>
+                                    <input type="datetime-local" class="form-control" id="eventStartDate" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="eventEndDate" class="form-label">Date de fin *</label>
+                                    <input type="datetime-local" class="form-control" id="eventEndDate" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventDescription" class="form-label">Description *</label>
+                            <textarea class="form-control" id="eventDescription" rows="4" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="eventLocation" class="form-label">Lieu</label>
+                                    <input type="text" class="form-control" id="eventLocation">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="eventCategory" class="form-label">Catégorie</label>
+                                    <select class="form-select" id="eventCategory">
+                                        <option value="other">Autre</option>
+                                        <option value="academic">Académique</option>
+                                        <option value="social">Social</option>
+                                        <option value="sports">Sportif</option>
+                                        <option value="workshop">Atelier</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger me-auto" id="deleteEventBtn" style="display: none;">Supprimer</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="saveEventBtn">Enregistrer</button>
                 </div>
             </div>
         </div>
