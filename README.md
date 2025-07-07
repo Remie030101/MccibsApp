@@ -1,12 +1,13 @@
 # MCCIBS Mobile Application
 
-A Flutter-based mobile application for MCCIBS (Management College of Computer Information and Business Studies) that provides students with access to their academic information, notifications, and more.
+A Flutter-based mobile application for MCCI Business School that provides students with access to their student card, notifications, and more.
 
 ## Features
 
 - Student Authentication
 - Student Card Access
-- Real-time Notifications
+- Events
+- Information
 - Profile Management
 - Cross-platform Support (iOS & Android)
 
@@ -17,7 +18,6 @@ A Flutter-based mobile application for MCCIBS (Management College of Computer In
 - **Database**: MongoDB
 - **Authentication**: JWT
 - **File Storage**: Local Storage
-- **Push Notifications**: Firebase Cloud Messaging
 
 ## Project Structure
 
@@ -86,10 +86,3 @@ flutter run
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Contact
-
-For any queries or support, please contact the development team at [contact@mccibs.com](mailto:contact@mccibs.com)
