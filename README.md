@@ -1,81 +1,78 @@
 # MCCIBS Mobile Application
 
-A Flutter-based mobile application for MCCI Business School that provides students with access to their student card, notifications, and more.
+Une application mobile basée sur Flutter pour MCCI Business School qui permet aux étudiants d’accéder à leurs informations académiques, de recevoir des notifications, et plus encore.
 
 ## Features
 
-- Student Authentication
-- Student Card Access
-- Events
-- Information
-- Profile Management
-- Cross-platform Support (iOS & Android)
+- Authentification des étudiants
+- Accès à la carte étudiante numérique
+- Notifications en temps réel
+- Gestion du profil
+- Support multiplateforme (iOS & Android)
 
 ## Tech Stack
 
 - **Frontend**: Flutter
 - **Backend**: Node.js with Express
-- **Database**: MongoDB
+- **Base de données**: MongoDB
 - **Authentication**: JWT
-- **File Storage**: Local Storage
+- **Stockage de fichiers**: Stockage local
 
 ## Project Structure
 
 ```
 mccibs_mobile_app_v2/
 ├── lib/                    # Flutter application code
-│   ├── models/            # Data models
-│   ├── screens/           # UI screens
-│   └── services/          # API and service integrations
-├── backend/               # Node.js backend server
-│   ├── routes/           # API routes
-│   ├── uploads/          # File uploads
-│   └── public/           # Static files
-└── ios/ & android/       # Platform-specific code
+│   ├── models/            # Modèles de données
+│   ├── screens/           # Écrans de l’interface utilisateur
+│   └── services/          # Intégrations API et services
+├── backend/               # Serveur backend Node.js
+│   ├── routes/           # Routes API
+│   ├── uploads/          # Téléversement de fichiers
+│   └── public/           # Fichiers statiques
+└── ios/ & android/       # Code spécifique aux plateformes
 ```
 
-## Getting Started
+## Démarrage
 
-### Prerequisites
+### Prérequis
 
 - Flutter SDK
 - Node.js
 - MongoDB
-- Xcode (for iOS development)
-- Android Studio (for Android development)
+- Android Studio (développement Android)
 
 ### Installation
 
-1. Clone the repository:
+1. Cloner le dépôt:
 ```bash
 git clone https://github.com/Remie030101/MccibsApp.git
 cd MccibsApp
 ```
 
-2. Install Flutter dependencies:
+2. Installer les dépendances Flutter:
 ```bash
 flutter pub get
 ```
 
-3. Install backend dependencies:
+3. Installer les dépendances du backend:
 ```bash
 cd backend
 npm install
 ```
 
-4. Configure environment variables:
-   - Create a `.env` file in the backend directory
-   - Add necessary environment variables (database URL, JWT secret, etc.)
+4. Configurer les variables d’environnement:
+   - Créer un fichier .env dans le répertoire backend
+   - Ajouter les variables nécessaires (URL de la base de données, secret JWT, etc.
 
-5. Start the backend server:
+5. Lancer le serveur backend:
 ```bash
 cd backend
 npm start
 ```
 
-6. Run the Flutter application:
+6. Lancer l’application Flutter:
 ```bash
 flutter run
 ```
-
 
